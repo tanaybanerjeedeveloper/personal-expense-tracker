@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import './models/Transaction.dart';
 import './widgets/transaction_form.dart';
 import './widgets/transaction_list.dart';
+import './widgets/chart.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,6 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter App',
+      theme: ThemeData(primarySwatch: Colors.purple, accentColor: Colors.amber),
       home: MyHomePage(),
     );
   }
@@ -23,21 +25,33 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<Transaction> _transactions = [
-    Transaction(
-        id: 't1', title: 'New Shoes', amount: 21.0, date: DateTime.now()),
-    Transaction(
-        id: 't2', title: 'Groceries', amount: 45.0, date: DateTime.now()),
+    // Transaction(
+    //     id: 't1', title: 'New Shoes', amount: 21.0, date: DateTime.now()),
+    // Transaction(
+    //     id: 't2', title: 'Groceries', amount: 45.0, date: DateTime.now()),
   ];
-  void _addNewTransaction(String title, double amount) {
+  void _addNewTransaction(String title, double amount, DateTime date) {
     final newTx = Transaction(
       amount: amount,
       title: title,
       id: DateTime.now().toString(),
-      date: DateTime.now(),
+      date: date,
     );
     setState(() {
       _transactions.add(newTx);
     });
+  }
+
+  void _deleteTransaction(String id) {
+    setState(() {
+      _transactions.removeWhere((tx) => tx.id == id);
+    });
+  }
+
+  List<Transaction> get _pastSevenDaysTransactions {
+    return _transactions.where((tx) {
+      return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7)));
+    }).toList();
   }
 
   void _showAddNewTxModal(BuildContext ctx) {
@@ -66,12 +80,9 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-              child: Card(
-                child: Text('Chart'),
-              ),
-            ),
-            TransactionList(_transactions),
+            Chart(_pastSevenDaysTransactions),
+            SizedBox(height: 30),
+            TransactionList(_transactions, _deleteTransaction),
           ],
         ),
       ),
