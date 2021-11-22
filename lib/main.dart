@@ -65,24 +65,42 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final appBar = AppBar(
+      title: Text('Expense Tracker'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () {
+            _showAddNewTxModal(context);
+          },
+        )
+      ],
+    );
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Expense Tracker'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              _showAddNewTxModal(context);
-            },
-          )
-        ],
-      ),
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Chart(_pastSevenDaysTransactions),
-            SizedBox(height: 30),
-            TransactionList(_transactions, _deleteTransaction),
+            Container(
+              height: (mediaQuery.size.height -
+                      appBar.preferredSize.height -
+                      mediaQuery.padding.top) *
+                  0.3,
+              child: Chart(_pastSevenDaysTransactions),
+            ),
+            SizedBox(
+                height: (mediaQuery.size.height -
+                        appBar.preferredSize.height -
+                        mediaQuery.padding.top) *
+                    0.02),
+            Container(
+              height: (mediaQuery.size.height -
+                      appBar.preferredSize.height -
+                      mediaQuery.padding.top) *
+                  0.68,
+              child: TransactionList(_transactions, _deleteTransaction),
+            ),
           ],
         ),
       ),
