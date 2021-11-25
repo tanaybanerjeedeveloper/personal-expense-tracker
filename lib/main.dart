@@ -1,11 +1,22 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; //for device orientation
 //importing custom widgets and models
 import './models/Transaction.dart';
 import './widgets/transaction_form.dart';
 import './widgets/transaction_list.dart';
 import './widgets/chart.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -66,20 +77,31 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final appBar = AppBar(
-      title: Text('Expense Tracker'),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () {
-            _showAddNewTxModal(context);
-          },
-        )
-      ],
-    );
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text('Expense Tracker'),
+            trailing: Row(
+              children: [
+                GestureDetector(
+                  child: Icon(CupertinoIcons.add),
+                  onTap: () => _showAddNewTxModal(context),
+                )
+              ],
+            ),
+          )
+        : AppBar(
+            title: Text('Expense Tracker'),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  _showAddNewTxModal(context);
+                },
+              )
+            ],
+          );
+    final pageBody = SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           children: [
             Container(
@@ -104,13 +126,22 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          _showAddNewTxModal(context);
-        },
-      ),
     );
+    return Platform.isIOS
+        ? CupertinoPageScaffold(navigationBar: appBar, child: pageBody)
+        : Scaffold(
+            appBar: appBar,
+            body: pageBody,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    child: Icon(Icons.add),
+                    onPressed: () {
+                      _showAddNewTxModal(context);
+                    },
+                  ),
+          );
   }
 }
